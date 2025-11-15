@@ -38,6 +38,61 @@ app.use(express.static(PUB_DIR));
 // Solana connection
 const conn = new Connection(RPC_URL, 'confirmed');
 
+// --- Simple in-memory catalog (edit to your needs) ---
+const PRODUCTS: Record<string, { label: string; amount: number; img: string }> = {
+  'corvette-1963-c2': {
+    label: '1963 Chevrolet Corvette C2',
+    amount: 25,                         // MSG amount you want to charge
+    img: '/cars/1963_CCC2.png',         // served from backend/public/cars/...
+  },
+  'dodge-1968-charger': {
+    label: '1968 Dodge Charger',
+    amount: 15,
+    img: '/cars/1968_charger.png',
+  },
+  'chevy-1970-camaro': {
+    label: '1970 Chevrolet Camaro',
+    amount: 12,
+    img: '/cars/1970_camaro.png',
+  },
+  'rare-sports-car': {
+    label: 'Rare Sports Car',
+    amount: 40,
+    img: '/cars/rare_sports.png',
+  },
+  'collectors-edition': {
+    label: "Collector's Edition",
+    amount: 5,
+    img: '/cars/collectors.png',
+  },
+};
+
+// --- Return product details as JSON (optional helper) ---
+app.get('/products/:id', (req, res) => {
+  const id = String(req.params.id);
+  const p = PRODUCTS[id];
+  if (!p) return res.status(404).json({ error: 'Product not found' });
+  res.json({ itemId: id, ...p });
+});
+
+// --- Redirect short link: /p/<id> -> /pay.html?label=&amount=&itemId=&img= ---
+app.get('/p/:id', (req, res) => {
+  const id = String(req.params.id);
+  const p = PRODUCTS[id];
+  if (!p) {
+    // Unknown product: minimal fallback (still opens pay page)
+    const params = new URLSearchParams({ label: 'Item', amount: '1', itemId: id });
+    return res.redirect(`/pay.html?${params.toString()}`);
+  }
+  const params = new URLSearchParams({
+    label: p.label,
+    amount: String(p.amount),
+    itemId: id,
+    img: p.img,
+  });
+  res.redirect(`/pay.html?${params.toString()}`);
+});
+
 // ---------- Helpers ----------
 function asAmount(name: string, raw: unknown): number {
   const n = Number(raw);
@@ -64,14 +119,21 @@ async function buildPreviewTx(payer: PublicKey, note: string) {
   const tx = new Transaction();
   tx.feePayer = payer;
   tx.recentBlockhash = blockhash;
-  tx.lastValidBlockHeight = lastValidBlockHeight;
+  (tx as any).lastValidBlockHeight = lastValidBlockHeight; // tolerated by wallets
   tx.add(ix);
   return tx;
 }
 
 async function buildMsgPayTx(payer: PublicKey, amountMsg: number) {
   const { blockhash, lastValidBlockHeight } = await conn.getLatestBlockhash('finalized');
-  const tx = new Transaction({ feePayer: payer, blockhash, lastValidBlockHeight });
+
+  // IMPORTANT: use recentBlockhash (not "blockhash") on the Transaction init
+  const tx = new Transaction({
+    feePayer: payer,
+    recentBlockhash: blockhash,
+    // lastValidBlockHeight is not part of the ctor type in some builds; set after if needed
+  } as any);
+  (tx as any).lastValidBlockHeight = lastValidBlockHeight;
 
   // Ensure ATAs (idempotent)
   const payerAta = getAssociatedTokenAddressSync(MSG_MINT_KEY, payer);
