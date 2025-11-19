@@ -1,5 +1,5 @@
 <!doctype html>
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <title>Buy with MSG</title>
@@ -7,112 +7,252 @@
     <!-- web3.js -->
     <script src="https://unpkg.com/@solana/web3.js@1.95.3/lib/index.iife.js"></script>
     <style>
-      :root{--bg:#070b10;--panel:#0e1620;--panel2:#0b121a;--border:#1b2a3b;--text:#e8f1ff;--muted:#9fb3c8;--accent:#1B5A72;--accent2:#2b7b9a;--radius:16px}
+      :root{
+        --bg: #0a0f14;
+        --bg-grad: radial-gradient(1200px 600px at 20% -10%, #112332 0%, transparent 60%), radial-gradient(900px 600px at 110% -10%, #0e1d29 0%, transparent 60%), #070b10;
+        --panel: #0e1620;
+        --panel2:#0b121a;
+        --border:#1a2a3a;
+        --text:#e9f3ff;
+        --muted:#a9bed4;
+        --accent:#1B5A72;   /* your brand */
+        --accent2:#2a7c9b;
+        --ok:#19c37d;
+        --warn:#ffb020;
+        --err:#ff5d5d;
+        --radius:16px;
+        --shadow: 0 10px 30px rgba(0,0,0,.35);
+      }
       *{box-sizing:border-box}
-      body{margin:0;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial;background:var(--bg);color:var(--text)}
-      .container{max-width:1040px;margin:36px auto;padding:20px}
-      .header{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
-      .wrap{display:grid;grid-template-columns:1.1fr .9fr;gap:24px}
-      @media (max-width:860px){.wrap{grid-template-columns:1fr}}
-      .card{background:linear-gradient(180deg,var(--panel),var(--panel2));border:1px solid var(--border);border-radius:var(--radius);padding:18px;box-shadow:0 8px 24px rgba(0,0,0,.35)}
-      .media{position:relative;overflow:hidden;border-radius:14px;border:1px solid var(--border)}
-      .media img{width:100%;display:block}
-      .skeleton{position:absolute;inset:0;border-radius:14px;background:linear-gradient(90deg,rgba(255,255,255,.04),rgba(255,255,255,.07),rgba(255,255,255,.04));background-size:200% 100%;animation:shimmer 1.2s linear infinite}
+      html,body{height:100%}
+      body{
+        margin:0;
+        font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+        background: var(--bg-grad);
+        color: var(--text);
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+      .container{max-width:1100px;margin:36px auto;padding:20px}
+      .header{
+        display:flex;justify-content:space-between;align-items:center;margin-bottom:22px;
+      }
+      .brand{
+        display:flex;align-items:center;gap:10px;
+      }
+      .logoDot{width:12px;height:12px;border-radius:50%;background:linear-gradient(180deg,var(--accent2),var(--accent));box-shadow:0 0 0 4px rgba(27,90,114,.15)}
+      .headline{margin:0;font-size:26px;letter-spacing:.2px}
+      .netPill{
+        font-size:12px;color:#cfe6ff;border:1px solid #2b4256;border-radius:999px;padding:6px 10px;background:#0d1822;
+      }
+
+      /* Layout cards */
+      .wrap{display:grid;grid-template-columns:1.15fr .85fr;gap:26px}
+      @media (max-width:900px){.wrap{grid-template-columns:1fr}}
+      .card{
+        background:linear-gradient(180deg,var(--panel),var(--panel2));
+        border:1px solid var(--border);
+        border-radius:var(--radius);
+        padding:20px;
+        box-shadow:var(--shadow);
+      }
+
+      /* Media frame */
+      .media{
+        position:relative;border-radius:18px;overflow:hidden;
+        background: #0b1219; border:1px solid var(--border);
+      }
+      .media::before{
+        content:""; position:absolute; inset:0;
+        border-radius:18px;
+        pointer-events:none;
+        /* subtle inner gradient frame */
+        box-shadow: inset 0 0 0 1px rgba(255,255,255,.04), inset 0 0 30px rgba(27,90,114,.08);
+      }
+      .media img{width:100%;display:block;object-fit:cover;aspect-ratio:4/3}
+      .skeleton{
+        position:absolute; inset:0; border-radius:18px;
+        background:linear-gradient(90deg,rgba(255,255,255,.05),rgba(255,255,255,.09),rgba(255,255,255,.05));
+        background-size:200% 100%; animation:shimmer 1.2s linear infinite;
+      }
       @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
-      h2{margin:0 0 6px 0;font-size:22px}
-      .price{font-size:18px;margin:2px 0 12px;color:#bfe6ff}
-      .row{display:flex;gap:10px;align-items:center;margin:12px 0}
-      .muted{color:var(--muted);opacity:.9}
+
+      /* Right column */
+      h2{margin:0 0 4px 0;font-size:22px}
+      .subtle{color:var(--muted);font-size:13px;margin-bottom:10px}
+      .price{
+        display:flex;align-items:center;gap:8px;
+        font-size:20px;margin:4px 0 14px;color:#cfe7ff;
+      }
+      .price strong{font-size:22px;letter-spacing:.2px}
+      .pill{
+        border:1px solid #22425a;background:#0c1822;color:#b9dfff;
+        border-radius:999px;padding:4px 8px;font-size:12px;
+      }
+      .row{display:flex;gap:10px;align-items:center;margin:12px 0;flex-wrap:wrap}
+      .muted{color:var(--muted);opacity:.95}
       .small{font-size:12px}
-      .divider{height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.06),transparent);margin:14px 0}
-      button{appearance:none;border:1px solid transparent;background:transparent;color:var(--text);padding:12px 16px;border-radius:12px;cursor:pointer;font-weight:600;transition:.18s ease}
+      .divider{height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.06),transparent);margin:16px 0}
+
+      /* Buttons */
+      button{appearance:none;border:1px solid transparent;background:transparent;color:var(--text);
+             padding:12px 16px;border-radius:12px;cursor:pointer;font-weight:600;transition:.18s ease;display:inline-flex;align-items:center;gap:10px}
       .btn{background:linear-gradient(180deg,var(--accent2),var(--accent));border:1px solid rgba(255,255,255,.08)}
       .btn:hover{filter:brightness(1.05)} .btn:active{transform:translateY(1px)}
       .btn.ghost{background:transparent;border:1px solid #223246;color:#d2e9ff}
       button[disabled]{opacity:.6;cursor:not-allowed}
-      .address{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px;padding:6px 10px;border:1px dashed #223246;border-radius:10px;color:#cfe6ff}
-      .log{white-space:pre-wrap;background:#0c131a;padding:12px;border-radius:12px;border:1px solid var(--border);min-height:56px}
+      .address{
+        font-family: ui-monospace, Menlo, Consolas, monospace;
+        font-size:12px;padding:7px 10px;border:1px dashed #223246;border-radius:10px;color:#cfe6ff;background:#0c1620;
+      }
+      .icn{display:inline-block; width:16px; height:16px; opacity:.9}
+
+      /* Key-value mini table */
+      .kv{display:grid;grid-template-columns:110px 1fr;gap:8px 14px;font-size:13px}
+      .kv div:nth-child(odd){color:#89a6c0}
+      .kv div:nth-child(even){color:#d8ecff}
+
+      /* Activity log */
+      .logWrap{display:grid; gap:8px}
+      .panelTitle{font-size:12px;color:#9fbdd6;letter-spacing:.4px;text-transform:uppercase}
+      .log{
+        white-space:pre-wrap;
+        background:#0c131a;padding:12px;border-radius:12px;border:1px solid var(--border);
+        height:160px;overflow:auto;overflow-wrap:anywhere;
+        font-family: ui-monospace, Menlo, Consolas, monospace; font-size:12px; line-height:1.35;
+      }
+      .log .line{margin:0 0 6px}
+      .log a{color:#9ad7ff;text-decoration:underline}
+      .log code{background:#0b161f;border:1px solid #1b2a3b;border-radius:6px;padding:2px 6px}
+
+      /* Mobile tweaks */
+      @media (max-width:480px){
+        .media img{aspect-ratio:auto; max-height:60vh}
+        .kv{grid-template-columns:90px 1fr}
+      }
+      @media (prefers-reduced-motion: reduce){
+        *{animation: none !important; transition: none !important}
+      }
+      /* Focus styles for accessibility */
+      :focus-visible{outline:2px solid #79b8ff; outline-offset:2px; border-radius:8px}
     </style>
   </head>
   <body>
     <div class="container">
+      <!-- Header -->
       <div class="header">
-        <h1 style="margin:0">MSG Checkout</h1>
-        <div class="muted small">Solana • Mainnet</div>
+        <div class="brand">
+          <span class="logoDot" aria-hidden="true"></span>
+          <h1 class="headline">MSG Checkout</h1>
+        </div>
+        <div class="netPill">Solana • Mainnet</div>
       </div>
 
       <div class="wrap">
+        <!-- Left: Media -->
         <div class="card">
-          <figure class="media">
-            <!-- no default src -->
+          <figure class="media" aria-label="Product media">
             <img id="img" alt="Item" loading="lazy"/>
             <div class="skeleton" id="imgSkel"></div>
           </figure>
         </div>
 
+        <!-- Right: Details + Actions -->
         <div class="card">
           <h2 id="label">Item</h2>
+          <div class="subtle" id="merchantLine">Secure on-chain payment in MSG</div>
+
           <div class="price">
-            <span id="amount">1</span> MSG
-            <span id="qtyNote" class="muted small"></span>
+            <strong><span id="amount">1</span> MSG</strong>
+            <span id="qtyNote" class="pill"></span>
           </div>
 
           <div class="row">
-            <button class="btn" id="connectBtn">Connect Wallet</button>
-            <span class="address" id="wallet"></span>
+            <button class="btn" id="connectBtn" aria-label="Connect wallet">
+              <!-- wallet icon -->
+              <svg class="icn" viewBox="0 0 24 24" fill="currentColor"><path d="M3 7a3 3 0 0 1 3-3h12a2 2 0 0 1 2 2v2h-5a3 3 0 1 0 0 6h5v2a2 2 0 0 1-2 2H6a3 3 0 0 1-3-3V7zm14 3h5v4h-5a2 2 0 1 1 0-4z"/></svg>
+              <span>Connect Wallet</span>
+            </button>
+            <span class="address" id="wallet" aria-live="polite"></span>
           </div>
+
           <div class="row">
-            <button class="btn ghost" id="previewBtn" disabled>Preview (no charge)</button>
-            <button class="btn" id="buyBtn" disabled>Buy with MSG</button>
+            <button class="btn ghost" id="previewBtn" disabled>
+              <!-- eye icon -->
+              <svg class="icn" viewBox="0 0 24 24" fill="currentColor"><path d="M12 5c5.523 0 10 4 11 7-1 3-5.477 7-11 7S2 15 1 12c1-3 5.477-7 11-7zm0 3a4 4 0 1 0 0 8 4 4 0 0 0 0-8z"/></svg>
+              Preview (no charge)
+            </button>
+            <button class="btn" id="buyBtn" disabled>
+              <!-- bolt icon -->
+              <svg class="icn" viewBox="0 0 24 24" fill="currentColor"><path d="M13 2 3 14h7l-1 8 11-12h-7l1-8z"/></svg>
+              Buy with MSG
+            </button>
           </div>
 
           <div class="divider"></div>
-          <div class="muted small">
-            <div>Item ID: <span id="itemId">item-001</span></div>
-            <div>Merchant receives MSG on-chain. You pay network fee in SOL.</div>
+
+          <div class="kv" aria-describedby="itemId">
+            <div>Item ID</div>   <div><span id="itemId">item-001</span></div>
+            <div>Network fee</div><div>Paid in SOL by buyer</div>
           </div>
 
           <div class="divider"></div>
-          <div class="log" id="log"></div>
+          <div class="logWrap">
+            <div class="panelTitle">Activity</div>
+            <div class="log" id="log" aria-live="polite"></div>
+          </div>
+
+          <!-- Fallback helper (used rarely; auto deep-link covers most) -->
+          <div class="divider"></div>
+          <div class="subtle small" id="walletHelp" hidden>
+            No wallet detected. <a id="openPhantom" href="#" style="color:#9ad7ff">Open in Phantom</a> or
+            <button id="copyLink" class="btn ghost" type="button" style="padding:6px 10px;font-size:12px">Copy Link</button>
+          </div>
         </div>
       </div>
     </div>
 
     <script>
-      // ---------- helpers ----------
+      /* ========= BASIC HELPERS / STATE ========= */
       const apiBase = `${location.protocol}//${location.host}`;
       const imgEl = document.getElementById('img');
       const imgSkel = document.getElementById('imgSkel');
       imgEl.addEventListener('load', ()=> imgSkel.style.display='none');
       imgEl.addEventListener('error', ()=> imgSkel.style.display='none');
 
-      // convert wix:image://v1/... → https://static.wixstatic.com/media/...
       function toPublicImageURL(src){
         if (!src) return '';
         if (/^https?:\/\//i.test(src) || src.startsWith('/')) return src;
         const m = src.match(/^wix:image:\/\/v1\/([^\/#?]+)/);
         return m ? `https://static.wixstatic.com/media/${m[1]}` : src;
       }
+      function isMobile(){ return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent); }
+      function inWalletUA(){ const ua = navigator.userAgent || ''; return /Phantom|Solflare|Backpack/i.test(ua); }
 
-      // ---------- params ----------
+      // Deep link to open this page inside Phantom (with autoconnect)
+      function deepLinkToPhantom() {
+        const target = new URL(location.href);
+        target.searchParams.set('autoconnect','1');
+        const link = `https://phantom.app/ul/browse/${encodeURIComponent(target.toString())}`;
+        location.href = link;
+      }
+
+      /* ========= PARAMS & HYDRATION ========= */
       const qs = new URLSearchParams(location.search);
-      const pid   = qs.get('pid');      // shortlink hydration id
+      const pid   = qs.get('pid');
       let   label = qs.get('label') || 'Item';
       let   itemId= qs.get('itemId') || '';
       let   img   = qs.get('img') || '';
       let   qty   = Number(qs.get('qty') || '1');
       if (!Number.isFinite(qty) || qty < 1) qty = 1;
-
-      // amountStr: if provided, it's a TOTAL already; if missing and pid is present, we'll compute from unit*qty
       let amountStr = qs.get('amount') || '';
 
-      // ---------- hydrate from /products/:pid if needed ----------
       async function hydrateFromPidIfNeeded(){
         if (!pid) return;
         try{
           const r = await fetch(`${apiBase}/products/${encodeURIComponent(pid)}`);
           if (!r.ok) throw new Error('product lookup failed');
-          const data = await r.json(); // { itemId, label, amount (unit), img }
+          const data = await r.json();
           if (!itemId) itemId = data.itemId || pid;
           if (!label || label === 'Item') label = data.label || label;
           if (!img) img = data.img || img;
@@ -121,68 +261,118 @@
             const total = Math.max(1, Math.round(unit * qty));
             amountStr = String(total);
           }
-        }catch(e){
-          // fallback
+        }catch{
           if (!itemId) itemId = pid;
         }
       }
 
       (async () => {
         await hydrateFromPidIfNeeded();
-
         if (!itemId) itemId = 'item-001';
         if (!amountStr) amountStr = '1';
 
-        // fill UI
         document.getElementById('label').textContent  = label;
         document.getElementById('itemId').textContent = itemId;
+
         const totalNum = Number(amountStr);
-        document.getElementById('amount').textContent = Number.isFinite(totalNum) ? totalNum.toLocaleString() : amountStr;
+        document.getElementById('amount').textContent =
+          Number.isFinite(totalNum) ? totalNum.toLocaleString() : amountStr;
 
         const qtyNoteEl = document.getElementById('qtyNote');
         if (qty > 1) {
           const unit = Number.isFinite(totalNum) ? totalNum / qty : 0;
-          qtyNoteEl.textContent = ` • Qty: ${qty}${unit ? ' @ ' + Math.round(unit).toLocaleString() + ' MSG ea' : ''}`;
+          qtyNoteEl.textContent = `Qty: ${qty}${unit ? ' • ' + Math.round(unit).toLocaleString() + ' MSG ea' : ''}`;
+        } else {
+          qtyNoteEl.textContent = '';
         }
 
-        if (img) {
-          imgEl.src = toPublicImageURL(img);
-        } else {
-          imgSkel.style.display='none';
+        if (img) imgEl.src = toPublicImageURL(img); else imgSkel.style.display='none';
+
+        // If we arrived via deep link with autoconnect, try to connect automatically
+        if (qs.get('autoconnect') === '1' && window.solana?.connect) {
+          try {
+            const res = await window.solana.connect();
+            pubkey = res.publicKey ?? window.solana.publicKey;
+            if (pubkey) {
+              provider = window.solana;
+              walletSpan.textContent = pubkey.toBase58().slice(0,4)+'…'+pubkey.toBase58().slice(-4);
+              previewBtn.disabled = false; buyBtn.disabled = false;
+              logText('Wallet connected.');
+            }
+          } catch {}
         }
       })();
 
-      // ---------- wallet + actions ----------
+      /* ========= WALLET & ACTIONS ========= */
       const connectBtn = document.getElementById('connectBtn');
       const previewBtn = document.getElementById('previewBtn');
       const buyBtn = document.getElementById('buyBtn');
       const walletSpan = document.getElementById('wallet');
       const logDiv = document.getElementById('log');
 
+      const helpBox     = document.getElementById('walletHelp');
+      const openPhantom = document.getElementById('openPhantom');
+      const copyLinkBtn = document.getElementById('copyLink');
+      if (openPhantom) openPhantom.addEventListener('click', (e)=>{ e.preventDefault(); deepLinkToPhantom(); });
+      if (copyLinkBtn) copyLinkBtn.onclick = async () => {
+        try{ await navigator.clipboard.writeText(location.href); logText('Link copied. Open your wallet app and paste it into its Browser.'); }
+        catch{ logText('Could not copy. Long-press the address bar to copy the URL.'); }
+      };
+      function showWalletHelp(){ if(helpBox){ helpBox.hidden = false; } }
+
       let provider = null;
       let pubkey = null;
 
-      function log(msg){ logDiv.textContent = `${msg}\n` + logDiv.textContent; }
+      // Logging helpers (compact & stable)
+      function short(s, keep=6){ if(!s||s.length<=keep*2+1) return s; return `${s.slice(0,keep)}…${s.slice(-keep)}`; }
+      function appendLine(node){ const wrap=document.createElement('div'); wrap.className='line'; wrap.appendChild(node); logDiv.appendChild(wrap); logDiv.scrollTop=logDiv.scrollHeight; }
+      function logText(txt){ const el=document.createElement('div'); el.textContent=txt; appendLine(el); }
+      function logSignature(sig){ const el=document.createElement('div'); el.innerHTML=`Signature: <code>${short(sig)}</code>`; appendLine(el); }
+      function logExplorerLink(sig){ const a=document.createElement('a'); a.href=`https://explorer.solana.com/tx/${sig}?cluster=mainnet-beta`; a.target='_blank'; a.rel='noreferrer'; a.textContent='View in Explorer'; appendLine(a); }
+
+      // Desktop auto-connect if trusted
+      (async function autoConnect(){
+        if (window.solana?.connect && !isMobile()) {
+          try {
+            const res = await window.solana.connect({ onlyIfTrusted: true });
+            pubkey = res.publicKey ?? window.solana.publicKey;
+            if (pubkey) {
+              provider = window.solana;
+              walletSpan.textContent = pubkey.toBase58().slice(0,4)+'…'+pubkey.toBase58().slice(-4);
+              previewBtn.disabled = false; buyBtn.disabled = false;
+              logText('Wallet auto-connected.');
+            }
+          } catch {}
+        }
+      })();
+
       function getProvider(){
         if ('solana' in window) { const p = window.solana; return p?.isPhantom ? p : p; }
-        alert('No Solana wallet found. Install Phantom or open in a wallet browser.'); return null;
+        return null;
       }
 
       connectBtn.onclick = async () => {
-        provider = getProvider(); if (!provider) return;
+        provider = getProvider();
+        if (!provider) {
+          // No injection. On mobile, auto deep-link to Phantom; else show helper.
+          if (isMobile() && !inWalletUA()) deepLinkToPhantom();
+          else { showWalletHelp(); alert('No Solana wallet detected. Install Phantom or open this link in a wallet browser.'); }
+          return;
+        }
         try {
           const res = await provider.connect();
           pubkey = res.publicKey ?? provider.publicKey;
           walletSpan.textContent = pubkey?.toBase58()?.slice(0,4)+'…'+pubkey?.toBase58()?.slice(-4);
           previewBtn.disabled = false; buyBtn.disabled = false;
-          log('Wallet connected.');
-        } catch { log('Connect cancelled.'); }
+          logText('Wallet connected.');
+        } catch { logText('Connect cancelled.'); }
       };
 
       async function requestTx({ test }){
         const url = new URL(apiBase + '/actions/pay');
-        url.searchParams.set('amount', amountStr);                // TOTAL MSG (qty applied upstream)
+        url.searchParams.set('amount', amountStr);         // total MSG (client-side total; can shift to server)
         url.searchParams.set('itemId', itemId || 'item');
+        url.searchParams.set('qty', String(qty));
         if (test) url.searchParams.set('test', 'true');
 
         const body = { account: pubkey.toBase58() };
@@ -198,13 +388,12 @@
         return resp.json();
       }
 
-      // recentBlockhash hydration + v0 support
+      // legacy + v0 support w/ blockhash hydration
       async function signAndSend(base64){
         const bytes = Uint8Array.from(atob(base64), c => c.charCodeAt(0));
         let tx;
-        try {
-          tx = solanaWeb3.Transaction.from(bytes);
-        } catch {
+        try { tx = solanaWeb3.Transaction.from(bytes); }
+        catch {
           const v0 = solanaWeb3.VersionedTransaction.deserialize(bytes);
           const res = await provider.signAndSendTransaction(v0);
           return res.signature;
@@ -222,23 +411,27 @@
       previewBtn.onclick = async () => {
         if (!provider || !pubkey) return alert('Connect wallet first');
         try {
-          log('Building preview transaction…');
+          logText('Building preview transaction…');
           const { transaction, message } = await requestTx({ test:true });
-          log(message);
+          if (message) logText(message);
           const sig = await signAndSend(transaction);
-          log(`Preview sent (memo-only). Signature: ${sig}\nhttps://explorer.solana.com/tx/${sig}?cluster=mainnet-beta`);
-        } catch (e) { log(`Preview failed: ${e.message || e}`); }
+          logText('Preview sent (memo-only).');
+          logSignature(sig);
+          logExplorerLink(sig);
+        } catch (e) { logText(`Preview failed: ${e.message || e}`); }
       };
 
       buyBtn.onclick = async () => {
         if (!provider || !pubkey) return alert('Connect wallet first');
         try {
-          log('Building purchase transaction…');
+          logText('Building purchase transaction…');
           const { transaction, message } = await requestTx({ test:false });
-          log(message);
+          if (message) logText(message);
           const sig = await signAndSend(transaction);
-          log(`Purchase submitted. Signature: ${sig}\nhttps://explorer.solana.com/tx/${sig}?cluster=mainnet-beta`);
-        } catch (e) { log(`Purchase failed: ${e.message || e}`); }
+          logText('Purchase submitted.');
+          logSignature(sig);
+          logExplorerLink(sig);
+        } catch (e) { logText(`Purchase failed: ${e.message || e}`); }
       };
     </script>
   </body>
